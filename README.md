@@ -12,7 +12,7 @@ Portfolio development work for Module 5 of Data Engineering Apprenticeship
 
 #### Books:
 - remove NaN from Books
-- Remove duplicate book titles? -- is this a list of transactions, or a register of books held by the library?
+- Check for duplicate transaction ids
 - ensure book titles are capitalised for each word
 - change format of Book checkout to datetime, not String
 

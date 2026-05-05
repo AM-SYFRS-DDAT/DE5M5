@@ -1,0 +1,22 @@
+Id,Books,Book checkout,Book Returned,Days allowed to borrow,Customer ID
+1.0,Catcher In The Rye,2023-02-20,25/02/2023,2 weeks,1.0
+2.0,Lord Of The Rings The Two Towers,2023-03-24,21/03/2023,2 weeks,2.0
+3.0,Lord Of The Rings The Return Of The Kind,2023-03-29,25/03/2023,2 weeks,3.0
+4.0,The Hobbit,2023-04-02,25/03/2023,2 weeks,4.0
+5.0,Dune,2023-04-02,25/03/2023,2 weeks,5.0
+6.0,Little Women,2023-04-02,01/05/2023,2 weeks,1.0
+7.0,It,2063-04-10,03/04/2023,2 weeks,6.0
+8.0,Misery,2023-04-15,03/04/2023,2 weeks,7.0
+9.0,Catch 22,2023-04-15,16/04/2023,2 weeks,7.0
+10.0,Animal Farm,2023-04-20,24/04/2023,2 weeks,2.0
+11.0,1984,2023-04-23,27/04/2023,2 weeks,8.0
+12.0,Little Women,2023-04-02,01/05/2023,2 weeks,1.0
+13.0,East Of Eden,2023-04-30,05/05/2023,2 weeks,2.0
+14.0,America Is In The Heart,2023-05-01,07/05/2023,2 weeks,3.0
+15.0,Wuthering Heights,2023-05-01,10/05/2023,2 weeks,9.0
+16.0,Dark Tales,2023-05-15,01/06/2023,2 weeks,2.0
+17.0,The Bloody Chamber,,04/06/2023,2 weeks,3.0
+18.0,Les Miserables,2023-06-03,07/06/2023,2 weeks,5.0
+19.0,Dracula,2023-06-10,10/07/2023,2 weeks,10.0
+20.0,Frankenstein,2023-06-01,20/06/2023,2 weeks,2.0
+21.0,,2023-06-01,05/06/2023,2 weeks,
