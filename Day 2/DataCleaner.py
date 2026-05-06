@@ -43,10 +43,6 @@ def add_days_difference_column(df, start_col, end_col, output_col="days_diff", a
         # Calculate difference in days
         diff = (df[end_col] - df[start_col]).dt.days
 
-        # Use absolute values if requested
-        if absolute:
-            diff = diff.abs()
-
         df[output_col] = diff
         return df
 
