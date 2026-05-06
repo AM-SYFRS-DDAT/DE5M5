@@ -86,37 +86,36 @@ df2['Book checkout'] = pd.to_datetime(df2['Book checkout'], format='%d/%m/%Y', e
 df2['Book Returned'] = pd.to_datetime(df2['Book Returned'], format='%d/%m/%Y', errors='coerce')
 
 def add_days_difference_column(df, start_col, end_col, output_col="days_diff", absolute=False):
-    """
-    Adds a new column with the number of days between two date columns.
+        """
+        Adds a new column with the number of days between two date columns.
 
-    Parameters:
-        df (pd.DataFrame): Input DataFrame.
-        start_col (str): Start date column name.
-        end_col (str): End date column name.
-        output_col (str): Name of the output column.
-        absolute (bool): If True, returns absolute day differences.
+        Parameters:
+            df (pd.DataFrame): Input DataFrame.
+            start_col (str): Start date column name.
+            end_col (str): End date column name.
+            output_col (str): Name of the output column.
+            absolute (bool): If True, returns absolute day differences.
 
-    Returns:
-        pd.DataFrame: DataFrame with the new column.
-    """
-    # Convert to datetime, invalid formats become NaT
-    df[start_col] = pd.to_datetime(df[start_col], errors='coerce')
-    df[end_col] = pd.to_datetime(df[end_col], errors='coerce')
+        Returns:
+            pd.DataFrame: DataFrame with the new column.
+        """
+        # Convert to datetime, invalid formats become NaT
+        df[start_col] = pd.to_datetime(df[start_col], errors='coerce')
+        df[end_col] = pd.to_datetime(df[end_col], errors='coerce')
 
-    # Calculate difference in days
-    diff = (df[end_col] - df[start_col]).dt.days
+        # Calculate difference in days
+        diff = (df[end_col] - df[start_col]).dt.days
 
-    # Use absolute values if requested
-    if absolute:
-        diff = diff.abs()
+        # Use absolute values if requested
+        if absolute:
+            diff = diff.abs()
 
-    df[output_col] = diff
-    return df
+        df[output_col] = diff
+        return df
 
 
-# Use add_days_difference_column function on Books df
-if __name__ == "__main__":
-    df2 = add_days_difference_column(df2, "Book checkout", "Book Returned", "days_between", absolute=True)
+# Use add_days_difference_column function on Books df:
+df2 = add_days_difference_column(df2, "Book checkout", "Book Returned", "days_between", absolute=True)
 
 # Convert ID columns to integers instead of floats
 import math
