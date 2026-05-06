@@ -1,0 +1,7 @@
+pandas
+numpy
+# math
+sqlalchemy
+urllib3
+# sys
+pyodbc
