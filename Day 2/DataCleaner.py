@@ -122,6 +122,36 @@ import math
 df2['Id'] = [int(x) for x in df2['Id']]
 df2['Customer ID'] = [int(x) for x in df2['Customer ID']]
 
+# Define function to remove date issue rows to a csv file as 'quarantine'
+def quarantine_dateGapIssues(df, column_name="result", output_file="cleaned.csv", removed_file="removed.csv", return_data=True):
+    try:
+        # Convert to numeric for safe comparison
+        df[column_name] = pd.to_numeric(df[column_name], errors="coerce")
+        
+        # Separate negative and non-negative rows
+        negative_df = df[df[column_name] < 0]
+        positive_df = df[df[column_name] >= 0]
+
+        # Save negative results
+        negative_df.to_csv(removed_file, index=False)
+
+        # Log counts
+        print(f"Cleaned data kept in DataFrame: {len(positive_df)}")
+        print(f"Removed negative records saved to: {removed_file} ({len(negative_df)} records removed)")
+
+        if return_data:
+            return positive_df#, negative_df
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+# Run quarantine function on Books df
+df2 = quarantine_dateGapIssues(
+    df2,
+    column_name = "days_between",
+    removed_file = "removed_bookRecords.csv"
+)
+
 # Calculate final completeness
 book_end_completeness = 100-(df2.isnull().mean() * 100)
 

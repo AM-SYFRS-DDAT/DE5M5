@@ -15,7 +15,6 @@ Id,Books,Book checkout,Book Returned,Days allowed to borrow,Customer ID,days_bet
 14,America Is In The Heart,2023-05-01,2023-05-07,2 weeks,3,6.0
 15,Wuthering Heights,2023-05-01,2023-05-10,2 weeks,9,9.0
 16,Dark Tales,2023-05-15,2023-06-01,2 weeks,2,17.0
-17,The Bloody Chamber,,2023-06-04,2 weeks,3,
 18,Les Miserables,2023-06-03,2023-06-07,2 weeks,5,4.0
 19,Dracula,2023-06-10,2023-07-10,2 weeks,10,30.0
 20,Frankenstein,2023-06-01,2023-06-20,2 weeks,2,19.0
