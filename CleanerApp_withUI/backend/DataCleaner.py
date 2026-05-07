@@ -75,7 +75,7 @@ def quarantine_dateGapIssues(df, column_name="result", output_file="cleaned.csv"
 #--------------------------
 
 # load csv file (Customers)
-df1 = pd.read_csv(r'C:\Users\Admin\Downloads\03_Library SystemCustomers.csv')
+df1 = pd.read_csv(r'03_Library SystemCustomers.csv')
 
 # Calculate completeness
 cust_start_completeness = 100-(df1.isnull().mean() * 100)
@@ -104,7 +104,7 @@ cust_end_completeness = 100-(df1.isnull().mean() * 100)
 #--------------------------
 
 # load csv file (Books)
-df2 = pd.read_csv(r'C:\Users\Admin\Downloads\03_Library Systembook.csv')
+df2 = pd.read_csv(r'03_Library Systembook.csv')
 
 # Calculate completeness
 book_start_completeness = 100-(df2.isnull().mean() * 100)
@@ -154,8 +154,8 @@ book_end_completeness = 100-(df2.isnull().mean() * 100)
 # OUTPUT TO CSV FILES
 #--------------------------
 
-df1.to_csv(r'C:\Users\Admin\Desktop\DE5M5\CustomersCleaned.csv', index=False)
-df2.to_csv(r'C:\Users\Admin\Desktop\DE5M5\BooksCleaned.csv', index=False)
+df1.to_csv(r'cleanedFiles\CustomersCleaned.csv', index=False)
+df2.to_csv(r'cleanedFiles\BooksCleaned.csv', index=False)
 
 # Show completeness variance after transformations
 print("Customer Starting Completeness (%):")
