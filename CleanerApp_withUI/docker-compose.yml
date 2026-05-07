@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "5000:5000"
+    volumes:
+      - shared-data:/data
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    volumes:
+      - shared-data:/data
+    environment:
+      - WATCH_INTERVAL=3
+
+volumes:
+  shared-data:

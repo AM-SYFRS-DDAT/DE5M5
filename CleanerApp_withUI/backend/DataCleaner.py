@@ -8,10 +8,49 @@ from sqlalchemy import create_engine
 import urllib
 import sys
 import math
+import os
 
 #--------------------------
 # DEFINE FUNCTIONS
 #--------------------------
+
+# Function to check for duplicates
+def DuplicateCheck(
+    df: pd.DataFrame, 
+    #column_name: str, 
+    return_values: bool = False
+):
+    """
+    Checks if specified column has any duplicate values
+
+    Parameters:
+        df (pd.DataFrame): The DataFrame to check.
+        column_name (str): The column name to check for duplicates.
+        return_values (bool): If True, returns the duplicate values instead of just True/False.
+
+    Returns:
+        bool | pd.Series: 
+            - If return_values=False: True if duplicates exist, False otherwise.
+            - If return_values=True: Series of duplicate values (may be empty).
+    
+    """
+    # Loop through columns using iloc
+    for col_index in range(df.shape[1]):  # df.shape[1] = number of columns
+        column_data = df.iloc[:, col_index]  # Select column by index
+        column_name = df.columns[col_index]
+    
+    # Define output messages
+        duplicate_msg = f"Check Failed: Duplicate(s) found in Column: '{column_name}'"
+        no_duplicate_msg = f"Check Passed: No Duplicate(s) found in Column: '{column_name}'"
+    
+    # Define duplicates test
+        duplicates = df[column_name].duplicated(keep=False)
+
+        if return_values:
+            # Return only the duplicate values (unique)
+            return df.loc[duplicates, column_name].drop_duplicates().reset_index(drop=True)
+        else:
+            return duplicate_msg if duplicates.any() else no_duplicate_msg
 
 # Function to clean date strings
 def clean_date_string(s):
@@ -69,180 +108,161 @@ def quarantine_dateGapIssues(df, column_name="result", output_file="cleaned.csv"
     except Exception as e:
         print(f"Error: {e}")
 
+WATCH_FOLDER = "/data"
+PROCESSED_FOLDER = "/data/processed"
+WATCH_INTERVAL = int(os.getenv("WATCH_INTERVAL", 5))
 
-#--------------------------
-# CUSTOMERS FILE PROCESSING
-#--------------------------
+os.makedirs(WATCH_FOLDER, exist_ok=True)
+os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
-# load csv file (Customers)
-df1 = pd.read_csv(r'03_Library SystemCustomers.csv')
+print(f"📂 Backend processor started. Watching '{WATCH_FOLDER}' every {WATCH_INTERVAL}s...")
 
-# Calculate completeness
-cust_start_completeness = 100-(df1.isnull().mean() * 100)
+while True:
+    try:
+        files = [f for f in os.listdir(WATCH_FOLDER) if f.lower().endswith(".csv")]
+        for filename in files:
+            filepath = os.path.join(WATCH_FOLDER, filename)
+            processed_path = os.path.join(PROCESSED_FOLDER, f"processed_{filename}")
 
-# Remove NaN values
-df1 = df1.dropna(how='all')
+            # Skip already processed files
+            if os.path.exists(processed_path):
+                continue
 
-# Check for duplicate IDs
-if df1['Customer ID'].duplicated().any():
-    print(f"Check Failed: Duplicate ID found")
-else:
-    print(f"Check Passed: No Duplicate ID found.")
+            try:
+                print(f"🔍 Found file: {filename}")
+                df = pd.read_csv(filepath)
 
-# Check for duplicate Names
-if df1['Customer Name'].duplicated().any():
-    print(f"Check Failed: Duplicate Name found")
-else:
-    print(f"Check Passed: No Duplicate Name found.")
+                # Calculate completeness
+                start_completeness = 100-(df.isnull().mean() * 100)
 
-# Calculate completeness
-cust_end_completeness = 100-(df1.isnull().mean() * 100)
+                # Remove NaN values
+                df = df.dropna(how='all')
 
+                # Check if each column has duplicates
+                print(DuplicateCheck(df))
 
-#--------------------------
-# BOOKS FILE PROCESSING
-#--------------------------
+                # Remove any leading or trailing spaces from values
+                df = df.map(lambda x: x.strip() if isinstance(x, str) else x)
 
-# load csv file (Books)
-df2 = pd.read_csv(r'03_Library Systembook.csv')
+                # Apply cleaning
+                df['Book checkout'] = df['Book checkout'].apply(clean_date_string)
 
-# Calculate completeness
-book_start_completeness = 100-(df2.isnull().mean() * 100)
+                # Convert to datetime
+                df['Book checkout'] = pd.to_datetime(df['Book checkout'], format='%d/%m/%Y', errors='coerce')
 
-# Remove NaN values
-df2 = df2.dropna()
+                # Convert Return date column to datetime
+                df2['Book Returned'] = pd.to_datetime(df2['Book Returned'], format='%d/%m/%Y', errors='coerce')
 
-# Check for duplicate IDs
-if df2['Id'].duplicated().any():
-    print(f"Check Failed: Duplicate ID found")
-else:
-    print(f"Check Passed: No Duplicate ID found.")
+                # Use add_days_difference_column function on Books df:
+                df2 = add_days_difference_column(df2, "Book checkout", "Book Returned", "days_between", absolute=True)
 
-# Capitalize each word of the book names for every row
-df2['Books'] = df2['Books'].str.title()
+                # Convert ID columns to integers instead of floats
+                df2['Id'] = [int(x) for x in df2['Id']]
+                df2['Customer ID'] = [int(x) for x in df2['Customer ID']]
 
-# Remove any leading or trailing spaces from book names
-df2 = df2.map(lambda x: x.strip() if isinstance(x, str) else x)
+                # Run quarantine function on Books df
+                df2 = quarantine_dateGapIssues(
+                    df2,
+                    column_name = "days_between",
+                    removed_file = "removed_bookRecords.csv"
+                )
 
-# Apply cleaning
-df2['Book checkout'] = df2['Book checkout'].apply(clean_date_string)
+                # Calculate final completeness
+                book_end_completeness = 100-(df2.isnull().mean() * 100)
 
-# Convert to datetime
-df2['Book checkout'] = pd.to_datetime(df2['Book checkout'], format='%d/%m/%Y', errors='coerce')
+                #--------------------------
+                # OUTPUT TO CSV FILES
+                #--------------------------
 
-# Convert Return date column to datetime
-df2['Book Returned'] = pd.to_datetime(df2['Book Returned'], format='%d/%m/%Y', errors='coerce')
+                df1.to_csv(r'cleanedFiles\CustomersCleaned.csv', index=False)
+                df2.to_csv(r'cleanedFiles\BooksCleaned.csv', index=False)
 
-# Use add_days_difference_column function on Books df:
-df2 = add_days_difference_column(df2, "Book checkout", "Book Returned", "days_between", absolute=True)
+                # Show completeness variance after transformations
+                print("Customer Starting Completeness (%):")
+                print(cust_start_completeness)
 
-# Convert ID columns to integers instead of floats
-df2['Id'] = [int(x) for x in df2['Id']]
-df2['Customer ID'] = [int(x) for x in df2['Customer ID']]
+                print("Customer Finishing Completeness (%):")
+                print(cust_end_completeness)
 
-# Run quarantine function on Books df
-df2 = quarantine_dateGapIssues(
-    df2,
-    column_name = "days_between",
-    removed_file = "removed_bookRecords.csv"
-)
+                print("Books Starting Completeness (%):")
+                print(book_start_completeness)
 
-# Calculate final completeness
-book_end_completeness = 100-(df2.isnull().mean() * 100)
+                print("Books Finishing Completeness (%):")
+                print(book_end_completeness)
 
-#--------------------------
-# OUTPUT TO CSV FILES
-#--------------------------
+                #--------------------------
+                # OUTPUT TO SQL DATABASE
+                #--------------------------
 
-df1.to_csv(r'cleanedFiles\CustomersCleaned.csv', index=False)
-df2.to_csv(r'cleanedFiles\BooksCleaned.csv', index=False)
+                # SQL Server connection details
+                server = r'STUDENT01'      
+                database = 'libraryProject' 
 
-# Show completeness variance after transformations
-print("Customer Starting Completeness (%):")
-print(cust_start_completeness)
+                # Define table for Customers data
+                table_name = 'Customers'
 
-print("Customer Finishing Completeness (%):")
-print(cust_end_completeness)
+                try:
+                    # Build ODBC connection string
+                    connection_string = (
+                        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+                        f"SERVER={server};"
+                        f"DATABASE={database};"
+                        f"Trusted_Connection=yes;"
+                    )
 
-print("Books Starting Completeness (%):")
-print(book_start_completeness)
+                    # Encode for SQLAlchemy
+                    connection_uri = "mssql+pyodbc:///?odbc_connect=" + urllib.parse.quote_plus(connection_string)
 
-print("Books Finishing Completeness (%):")
-print(book_end_completeness)
+                    # Create SQLAlchemy engine
+                    engine = create_engine(connection_uri, fast_executemany=True)
 
-#--------------------------
-# OUTPUT TO SQL DATABASE
-#--------------------------
+                    # Export DataFrame to SQL Server
+                    df1.to_sql(
+                        name=table_name,
+                        con=engine,
+                        if_exists='replace',  # 'replace' overwrites, 'append' adds rows
+                        index=False
+                    )
 
-# SQL Server connection details
-server = r'STUDENT01'      
-database = 'libraryProject' 
+                    print(f"✅ DataFrame successfully exported to table '{table_name}' in database '{database}'.")
+                    print("You can now view it in SSMS.")
 
-# Define table for Customers data
-table_name = 'Customers'
-
-try:
-    # Build ODBC connection string
-    connection_string = (
-        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-        f"SERVER={server};"
-        f"DATABASE={database};"
-        f"Trusted_Connection=yes;"
-    )
-
-    # Encode for SQLAlchemy
-    connection_uri = "mssql+pyodbc:///?odbc_connect=" + urllib.parse.quote_plus(connection_string)
-
-    # Create SQLAlchemy engine
-    engine = create_engine(connection_uri, fast_executemany=True)
-
-    # Export DataFrame to SQL Server
-    df1.to_sql(
-        name=table_name,
-        con=engine,
-        if_exists='replace',  # 'replace' overwrites, 'append' adds rows
-        index=False
-    )
-
-    print(f"✅ DataFrame successfully exported to table '{table_name}' in database '{database}'.")
-    print("You can now view it in SSMS.")
-
-except Exception as e:
-    print("Failed to export DataFrame to SQL Server.")
-    print("Error details:", e)
-    sys.exit(1)
+                except Exception as e:
+                    print("Failed to export DataFrame to SQL Server.")
+                    print("Error details:", e)
+                    sys.exit(1)
 
 
-# Define table for Books data
-table_name = 'Books'
+                # Define table for Books data
+                table_name = 'Books'
 
-try:
-    # Build ODBC connection string
-    connection_string = (
-        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-        f"SERVER={server};"
-        f"DATABASE={database};"
-        f"Trusted_Connection=yes;"
-    )
+                try:
+                    # Build ODBC connection string
+                    connection_string = (
+                        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+                        f"SERVER={server};"
+                        f"DATABASE={database};"
+                        f"Trusted_Connection=yes;"
+                    )
 
-    # Encode for SQLAlchemy
-    connection_uri = "mssql+pyodbc:///?odbc_connect=" + urllib.parse.quote_plus(connection_string)
+                    # Encode for SQLAlchemy
+                    connection_uri = "mssql+pyodbc:///?odbc_connect=" + urllib.parse.quote_plus(connection_string)
 
-    # Create SQLAlchemy engine
-    engine = create_engine(connection_uri, fast_executemany=True)
+                    # Create SQLAlchemy engine
+                    engine = create_engine(connection_uri, fast_executemany=True)
 
-    # Export DataFrame to SQL Server
-    df2.to_sql(
-        name=table_name,
-        con=engine,
-        if_exists='replace',  # 'replace' overwrites, 'append' adds rows
-        index=False
-    )
+                    # Export DataFrame to SQL Server
+                    df2.to_sql(
+                        name=table_name,
+                        con=engine,
+                        if_exists='replace',  # 'replace' overwrites, 'append' adds rows
+                        index=False
+                    )
 
-    print(f"✅ DataFrame successfully exported to table '{table_name}' in database '{database}'.")
-    print("You can now view it in SSMS.")
+                    print(f"✅ DataFrame successfully exported to table '{table_name}' in database '{database}'.")
+                    print("You can now view it in SSMS.")
 
-except Exception as e:
-    print("Failed to export DataFrame to SQL Server.")
-    print("Error details:", e)
-    sys.exit(1)
+                except Exception as e:
+                    print("Failed to export DataFrame to SQL Server.")
+                    print("Error details:", e)
+                    sys.exit(1)
