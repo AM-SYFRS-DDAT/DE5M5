@@ -195,6 +195,11 @@ metrics_df = pd.DataFrame({
 })
 
 
+# Add a simple unique ID column
+metrics_df.insert(0, 'ID', range(1, len(metrics_df) + 1))
+
+
+
 #--------------------------
 # OUTPUT TO SQL DATABASE
 #--------------------------
