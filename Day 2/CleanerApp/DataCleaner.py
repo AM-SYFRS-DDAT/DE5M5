@@ -8,6 +8,7 @@ from sqlalchemy import create_engine
 import urllib
 import sys
 import math
+from datetime import datetime
 
 #--------------------------
 # DEFINE FUNCTIONS
@@ -58,13 +59,14 @@ def quarantine_dateGapIssues(df, column_name="result", output_file="cleaned.csv"
 
         # Save negative results
         negative_df.to_csv(removed_file, index=False)
+        rows_removed = len(negative_df)
 
         # Log counts
         print(f"Cleaned data kept in DataFrame: {len(positive_df)}")
         print(f"Removed negative records saved to: {removed_file} ({len(negative_df)} records removed)")
 
         if return_data:
-            return positive_df#, negative_df
+            return positive_df, rows_removed, negative_df
 
     except Exception as e:
         print(f"Error: {e}")
@@ -74,8 +76,11 @@ def quarantine_dateGapIssues(df, column_name="result", output_file="cleaned.csv"
 # CUSTOMERS FILE PROCESSING
 #--------------------------
 
+# Define fileName_1
+FileName_1 = '03_Library SystemCustomers.csv'
+
 # load csv file (Customers)
-df1 = pd.read_csv(r'03_Library SystemCustomers.csv')
+df1 = pd.read_csv(rf"{FileName_1}")
 
 # Calculate completeness
 cust_start_completeness = 100-(df1.isnull().mean() * 100)
@@ -103,8 +108,11 @@ cust_end_completeness = 100-(df1.isnull().mean() * 100)
 # BOOKS FILE PROCESSING
 #--------------------------
 
+# Define fileName_2
+FileName_2 = '03_Library Systembook.csv'
+
 # load csv file (Books)
-df2 = pd.read_csv(r'03_Library Systembook.csv')
+df2 = pd.read_csv(rf"{FileName_2}")
 
 # Calculate completeness
 book_start_completeness = 100-(df2.isnull().mean() * 100)
@@ -141,7 +149,7 @@ df2['Id'] = [int(x) for x in df2['Id']]
 df2['Customer ID'] = [int(x) for x in df2['Customer ID']]
 
 # Run quarantine function on Books df
-df2 = quarantine_dateGapIssues(
+df2, rows_removed, var3 = quarantine_dateGapIssues(
     df2,
     column_name = "days_between",
     removed_file = "removed_bookRecords.csv"
@@ -154,8 +162,8 @@ book_end_completeness = 100-(df2.isnull().mean() * 100)
 # OUTPUT TO CSV FILES
 #--------------------------
 
-df1.to_csv(r'cleanedFiles\CustomersCleaned.csv', index=False)
-df2.to_csv(r'cleanedFiles\BooksCleaned.csv', index=False)
+# df1.to_csv(r'cleanedFiles\CustomersCleaned.csv', index=False)
+# df2.to_csv(r'cleanedFiles\BooksCleaned.csv', index=False)
 
 # Show completeness variance after transformations
 print("Customer Starting Completeness (%):")
@@ -170,6 +178,23 @@ print(book_start_completeness)
 print("Books Finishing Completeness (%):")
 print(book_end_completeness)
 
+
+#--------------------------
+# CREATE METRICS DATAFRAME
+#--------------------------
+# Create a DataFrame as a dictionary
+metrics_df = pd.DataFrame({
+    'TimeStamp': datetime.now(),
+    'FileName_1': FileName_1,
+    'FileName_2': FileName_2,
+    'RowsRemoved': rows_removed,
+    'CustStartCompleteness' : cust_start_completeness,
+    'CustEndCompleteness' : cust_end_completeness,
+    'BooksStartCompleteness' : book_start_completeness,
+    'BooksEndCompleteness' : book_end_completeness
+})
+
+
 #--------------------------
 # OUTPUT TO SQL DATABASE
 #--------------------------
@@ -177,6 +202,41 @@ print(book_end_completeness)
 # SQL Server connection details
 server = r'STUDENT01'      
 database = 'libraryProject' 
+
+# Define table for Customers data
+table_name = 'ProcessingLog'
+
+try:
+    # Build ODBC connection string
+    connection_string = (
+        f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+        f"SERVER={server};"
+        f"DATABASE={database};"
+        f"Trusted_Connection=yes;"
+    )
+
+    # Encode for SQLAlchemy
+    connection_uri = "mssql+pyodbc:///?odbc_connect=" + urllib.parse.quote_plus(connection_string)
+
+    # Create SQLAlchemy engine
+    engine = create_engine(connection_uri, fast_executemany=True)
+
+    # Export DataFrame to SQL Server
+    metrics_df.to_sql(
+        name=table_name,
+        con=engine,
+        if_exists='replace',  # 'replace' overwrites, 'append' adds rows
+        index=False
+    )
+
+    print(f"✅ DataFrame successfully exported to table '{table_name}' in database '{database}'.")
+    print("You can now view it in SSMS.")
+
+except Exception as e:
+    print("Failed to export DataFrame to SQL Server.")
+    print("Error details:", e)
+    sys.exit(1)
+
 
 # Define table for Customers data
 table_name = 'Customers'
@@ -200,7 +260,7 @@ try:
     df1.to_sql(
         name=table_name,
         con=engine,
-        if_exists='replace',  # 'replace' overwrites, 'append' adds rows
+        if_exists='append',  # 'replace' overwrites, 'append' adds rows
         index=False
     )
 
