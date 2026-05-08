@@ -5,10 +5,61 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-2" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Backend Container" vertex="1">
-          <mxGeometry height="280" width="200" x="40" y="160" as="geometry" />
+          <mxGeometry height="170" width="400" x="40" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-5" parent="rDHVlWBP_Ud7Ryi1VKtr-2" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" value="Python&amp;nbsp;&lt;div&gt;Application&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="150" y="60" as="geometry" />
         </mxCell>
         <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-3" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Frontend Container" vertex="1">
-          <mxGeometry height="280" width="200" x="310" y="160" as="geometry" />
+          <mxGeometry height="160" width="400" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-4" parent="1" style="shape=dataStorage;whiteSpace=wrap;html=1;fixedSize=1;" value="Azure&amp;nbsp;&lt;div&gt;Database&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="100" x="600" y="245" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-10" parent="1" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;" value="DataStore Volume" vertex="1">
+          <mxGeometry height="130" width="400" x="40" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-8" parent="rDHVlWBP_Ud7Ryi1VKtr-10" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;" value="User inputted CSV" vertex="1">
+          <mxGeometry height="80" width="120" x="50" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-6" parent="rDHVlWBP_Ud7Ryi1VKtr-10" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;" value="Cleaned CSV file" vertex="1">
+          <mxGeometry height="80" width="120" x="243" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-13" edge="1" parent="1" source="rDHVlWBP_Ud7Ryi1VKtr-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0.565;entryY=0.783;entryDx=0;entryDy=0;entryPerimeter=0;" target="rDHVlWBP_Ud7Ryi1VKtr-6">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="351" y="456" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-14" edge="1" parent="1" source="rDHVlWBP_Ud7Ryi1VKtr-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.433;exitY=0.893;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitPerimeter=0;" target="rDHVlWBP_Ud7Ryi1VKtr-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="144" y="316" />
+              <mxPoint x="144" y="470" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-18" edge="1" parent="1" source="rDHVlWBP_Ud7Ryi1VKtr-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" target="rDHVlWBP_Ud7Ryi1VKtr-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-15" parent="1" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;" value="Quarantine CSV file" vertex="1">
+          <mxGeometry height="80" width="120" x="615" y="471" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-16" edge="1" parent="1" source="rDHVlWBP_Ud7Ryi1VKtr-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="rDHVlWBP_Ud7Ryi1VKtr-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-17" edge="1" parent="1" source="rDHVlWBP_Ud7Ryi1VKtr-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="rDHVlWBP_Ud7Ryi1VKtr-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-22" edge="1" parent="1" source="rDHVlWBP_Ud7Ryi1VKtr-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=80;exitDy=65;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="rDHVlWBP_Ud7Ryi1VKtr-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-19" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;" value="Log File of Process" vertex="1">
+          <mxGeometry height="100" width="80" x="520" y="379" as="geometry" />
+        </mxCell>
+        <mxCell id="rDHVlWBP_Ud7Ryi1VKtr-21" edge="1" parent="1" source="rDHVlWBP_Ud7Ryi1VKtr-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.015;entryY=0.918;entryDx=0;entryDy=0;entryPerimeter=0;" target="rDHVlWBP_Ud7Ryi1VKtr-19">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
